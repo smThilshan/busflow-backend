@@ -16,8 +16,6 @@ public class IncomeController {
 
     private final IncomeService incomeService;
 
-
-
     @PostMapping
     public IncomeResponseDTO addIncome(@RequestBody IncomeRequestDTO request) {
         return incomeService.addIncome(request);

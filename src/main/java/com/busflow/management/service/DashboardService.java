@@ -26,7 +26,7 @@ public class DashboardService {
         this.expenseRepository = expenseRepository;
     }
 
-    public DashboardResponseDTO getConductorWeekly(Long userId){
+    public DashboardResponseDTO getConductorYesterday(Long userId){
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -40,10 +40,10 @@ public class DashboardService {
             throw new RuntimeException("Bus not assigned");
         }
 
-        // Weekly range: today to 7 days later
+        // Weekly range: today to yesterday
         LocalDate today = LocalDate.now();
         LocalDateTime start = today.atStartOfDay();
-        LocalDateTime end = today.plusDays(7).atStartOfDay();
+        LocalDateTime end = today.plusDays(1).atStartOfDay();
 
 
         Double income = incomeRepository.getIncomeBetween(bus.getId(),start, end);

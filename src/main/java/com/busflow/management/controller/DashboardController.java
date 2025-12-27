@@ -17,8 +17,8 @@ public class DashboardController {
         this.dashboardService = dashboardService;
     }
 
-    @GetMapping("/conductor/weekly")
+    @GetMapping("/conductor/yesterday")
     public DashboardResponseDTO conductorToday(@RequestParam Long userId) {
-        return dashboardService.getConductorWeekly(userId);
+        return dashboardService.getConductorYesterday(userId);
     }
 }
