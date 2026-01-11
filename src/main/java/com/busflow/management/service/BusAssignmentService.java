@@ -4,9 +4,11 @@ import com.busflow.management.dto.AssignBusRequestDTO;
 import com.busflow.management.entity.Bus;
 import com.busflow.management.entity.User;
 import com.busflow.management.enums.Role;
+import com.busflow.management.exception.InvalidCredentialsException;
 import com.busflow.management.repository.BusRepository;
 import com.busflow.management.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,5 +39,22 @@ public class BusAssignmentService {
 
         conductor.setBus(bus);
         userRepository.save(conductor);
+    }
+
+    @Service
+    @RequiredArgsConstructor
+    public static class PasswordAuthService {
+
+        private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+        private String hash(String rawPassword) {
+            return encoder.encode(rawPassword);
+        }
+
+        public void validate(String rawPassword, String hashedPassword) {
+            if (!encoder.matches(rawPassword, hashedPassword)) {
+                throw new InvalidCredentialsException("Invalid username or password");
+            }
+        }
     }
 }

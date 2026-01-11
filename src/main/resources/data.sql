@@ -3,11 +3,11 @@ INSERT INTO bus (id, bus_number) VALUES (1, 'NB-2231');
 INSERT INTO bus (id, bus_number) VALUES (2, 'NB-2089');
 
 -- USERS
-INSERT INTO users (id, username, password, role)
-VALUES (1, 'owner1', 'password123', 'OWNER');
-
-INSERT INTO users (id, username, password, role)
-VALUES (2, 'conductor1', 'password123', 'CONDUCTOR');
+--INSERT INTO users (id, username, password, role)
+--VALUES (1, 'owner1', 'password123', 'OWNER');
+--
+--INSERT INTO users (id, username, password, role)
+--VALUES (2, 'conductor1', 'password123', 'CONDUCTOR');
 
 -- INCOME
 INSERT INTO income (id, amount, description, created_at, bus_id)
