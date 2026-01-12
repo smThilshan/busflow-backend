@@ -32,10 +32,15 @@ public class JwtService {
         return Jwts.builder()
                 .subject(user.getUsername())
                 .claim("role", user.getRole().name())
+                .claim("userId", user.getId())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))  // NEW API
                 .signWith(key)  // Use the key variable, no need for SignatureAlgorithm
                 .compact();
+    }
+
+    public Long getUserIdFromToken(String token) {
+        return getClaims(token).get("userId", Long.class);
     }
 
     public String extractUsername(String token) {
@@ -51,7 +56,7 @@ public class JwtService {
         }
     }
 
-    private Claims getClaims(String token) {
+    public Claims getClaims(String token) {
         return Jwts.parser()
                 .verifyWith(key)
                 .build()

@@ -22,10 +22,10 @@ public class IncomeService {
         this.userRepository = userRepository;
     }
 
-    public IncomeResponseDTO addIncome(IncomeRequestDTO request){
+    public IncomeResponseDTO addIncome(IncomeRequestDTO request, Long userId) {
 
-//        Get the user
-        User user = userRepository.findById(request.getUserId()).orElseThrow(()-> new RuntimeException("User Not Found"));
+//        Validate the user from jwt
+        User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("User Not Found"));
 
         // 2. Role validation
         if (user.getRole() != Role.CONDUCTOR){
@@ -41,11 +41,30 @@ public class IncomeService {
 //        Create income
         Income income = new Income();
         income.setAmount(request.getAmount());
-        income.setDescription(request.getDescription());
+//        income.setDescription(request.getDescription());
         income.setBus(bus);
+        income.setIncomeType(request.getType());
 
         Income savedIncome = incomeRepository.save(income);
-        return new IncomeResponseDTO(savedIncome.getId(), "Income added successfully");
+        return new IncomeResponseDTO(savedIncome.getId(), savedIncome.getIncomeType(),  savedIncome.getAmount());
 
+
+    }
+
+    public IncomeResponseDTO getIncomeById(Long incomeId, Long userId) {
+
+        User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("User Not Found"));
+
+        Bus bus = user.getBus();
+        if (bus == null) {
+            throw new RuntimeException("User not assigned to a bus");
+        }
+
+        Income income = incomeRepository.findById(incomeId).orElseThrow(()-> new RuntimeException("Income Not Found"));
+        return new IncomeResponseDTO(
+                income.getId(),
+                income.getIncomeType(),
+                income.getAmount()
+        );
     }
 }

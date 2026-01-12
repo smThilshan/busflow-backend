@@ -1,11 +1,13 @@
 package com.busflow.management.entity;
 
+import com.busflow.management.enums.IncomeType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -19,9 +21,11 @@ public class Income extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double amount;
+    private BigDecimal amount;
 
-    private String description;
+//    private String description;
+    @Enumerated(EnumType.STRING)  // Store as STRING in DB (recommended)
+    private IncomeType incomeType;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 

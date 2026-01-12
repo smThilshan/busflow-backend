@@ -4,10 +4,7 @@ import com.busflow.management.dto.AssignBusRequestDTO;
 import com.busflow.management.service.BusAssignmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/buses")
@@ -16,7 +13,7 @@ public class BusController {
 
     private final BusAssignmentService busAssignmentService;
 
-    @PostMapping("/assign-conductor")
+    @PutMapping("/{id}/conductor")
     public ResponseEntity<String> assignConductorToBus(
             @RequestBody AssignBusRequestDTO request) {
 

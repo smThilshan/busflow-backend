@@ -2,8 +2,10 @@ package com.busflow.management.service;
 
 import com.busflow.management.dto.ExpenseRequestDTO;
 import com.busflow.management.dto.ExpenseResponseDTO;
+import com.busflow.management.dto.IncomeResponseDTO;
 import com.busflow.management.entity.Bus;
 import com.busflow.management.entity.Expense;
+import com.busflow.management.entity.Income;
 import com.busflow.management.entity.User;
 import com.busflow.management.enums.Role;
 import com.busflow.management.repository.ExpenseRepository;
@@ -46,6 +48,23 @@ public class ExpenseService {
         return new ExpenseResponseDTO(
                 savedExpense.getId(),
                 "Expense added successfully"
+        );
+    }
+
+    public ExpenseResponseDTO getExpenseById(Long expenseId, Long userId) {
+
+        User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("User Not Found"));
+
+        Bus bus = user.getBus();
+        if (bus == null) {
+            throw new RuntimeException("User not assigned to a bus");
+        }
+
+        Expense expense = expenseRepository.findById(expenseId).orElseThrow(()-> new RuntimeException("Expense Not Found"));
+        return new ExpenseResponseDTO(
+                expense.getId(),
+                expense.getCategory()
+
         );
     }
 }

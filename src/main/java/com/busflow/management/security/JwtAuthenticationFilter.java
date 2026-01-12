@@ -1,5 +1,6 @@
 package com.busflow.management.security;
 
+import com.busflow.management.config.CustomUserDetails;
 import com.busflow.management.entity.User;
 import com.busflow.management.service.UserAuthService;
 import jakarta.servlet.FilterChain;
@@ -20,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
-    private final UserAuthService userAuthService;
+//    private final UserAuthService userAuthService;
 
 
     @Override
@@ -40,13 +41,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+        // Extract data from JWT (no DB call needed!)
+        Long userId = jwtService.getUserIdFromToken(token);
         String username = jwtService.extractUsername(token);
-        User user = userAuthService.getUserbyUsername(username);
+        String role = jwtService.getClaims(token).get("role", String.class);
+
+        // Create CustomUserDetails
+        CustomUserDetails userDetails = new CustomUserDetails(userId, username, role);
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
-                        user, null, List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
-                );
+                        userDetails, null, userDetails.getAuthorities());
+
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         filterChain.doFilter(request, response);
