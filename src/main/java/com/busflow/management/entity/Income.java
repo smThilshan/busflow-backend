@@ -23,13 +23,40 @@ public class Income extends BaseEntity {
 
     private BigDecimal amount;
 
-//    private String description;
     @Enumerated(EnumType.STRING)  // Store as STRING in DB (recommended)
     private IncomeType incomeType;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bus_id")
     private Bus bus;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_id")
+    private User createdBy;
+
+    // ================= TRIP INFO with prefixed columns =================
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "numberOfTrips", column = @Column(name = "trip_number_of_trips")),
+            @AttributeOverride(name = "fromAmount", column = @Column(name = "trip_from_amount")),
+            @AttributeOverride(name = "toAmount", column = @Column(name = "trip_to_amount")),
+            @AttributeOverride(name = "otherExpense", column = @Column(name = "trip_other_expense")),
+            @AttributeOverride(name = "driverSalary", column = @Column(name = "trip_driver_salary")),
+            @AttributeOverride(name = "conductorSalary", column = @Column(name = "trip_conductor_salary"))
+    })
+    private TripInfo tripInfo;
+
+    // ================= HIRE INFO with prefixed columns =================
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "numberOfDays", column = @Column(name = "hire_number_of_days")),
+            @AttributeOverride(name = "fromLocation", column = @Column(name = "hire_from_location")),
+            @AttributeOverride(name = "destination", column = @Column(name = "hire_destination")),
+            @AttributeOverride(name = "otherExpense", column = @Column(name = "hire_other_expense")),
+            @AttributeOverride(name = "driverSalary", column = @Column(name = "hire_driver_salary")),
+            @AttributeOverride(name = "conductorSalary", column = @Column(name = "hire_conductor_salary"))
+    })
+    private HireInfo hireInfo;
 }

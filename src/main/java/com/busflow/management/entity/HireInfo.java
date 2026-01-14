@@ -1,0 +1,23 @@
+package com.busflow.management.entity;
+
+import jakarta.persistence.Embeddable;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+@Embeddable
+@Getter
+@Setter
+@NoArgsConstructor
+public class HireInfo {
+    private Integer numberOfDays;
+    private LocalDate date;
+    private String fromLocation;
+    private String destination;
+    private BigDecimal otherExpense;
+    private BigDecimal driverSalary;
+    private BigDecimal conductorSalary;
+}

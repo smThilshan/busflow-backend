@@ -2,7 +2,7 @@ package com.busflow.management.security;
 
 import com.busflow.management.config.CustomUserDetails;
 import com.busflow.management.entity.User;
-import com.busflow.management.service.UserAuthService;
+import com.busflow.management.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
-//    private final UserAuthService userAuthService;
+    private final UserRepository userRepository;
 
 
     @Override
@@ -43,11 +43,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Extract data from JWT (no DB call needed!)
         Long userId = jwtService.getUserIdFromToken(token);
+        User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("user not found"));
         String username = jwtService.extractUsername(token);
         String role = jwtService.getClaims(token).get("role", String.class);
 
         // Create CustomUserDetails
-        CustomUserDetails userDetails = new CustomUserDetails(userId, username, role);
+        CustomUserDetails userDetails = new CustomUserDetails(user);
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(

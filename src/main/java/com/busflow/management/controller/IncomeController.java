@@ -21,20 +21,20 @@ public class IncomeController {
     private final IncomeService incomeService;
 
     @PostMapping
-    public ResponseEntity<IncomeResponseDTO> addIncome(@Valid @RequestBody IncomeRequestDTO request, @AuthenticationPrincipal CustomUserDetails user){
+    public ResponseEntity<IncomeResponseDTO> addIncome(@Valid @RequestBody IncomeRequestDTO request, @AuthenticationPrincipal CustomUserDetails userDetails){
 
         // Call service with authenticated user ID
-        IncomeResponseDTO response = incomeService.addIncome(request, user.getId());
+        IncomeResponseDTO response = incomeService.addIncome(request, userDetails.getUser());
 
         // Return proper HTTP status
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<IncomeResponseDTO> getIncome(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails user){
-        IncomeResponseDTO response = incomeService.getIncomeById(id,user.getId());
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<IncomeResponseDTO> getIncome(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails user){
+//        IncomeResponseDTO response = incomeService.getIncomeById(id,user.getId());
+//        return ResponseEntity.ok(response);
+//    }
 
 
 }

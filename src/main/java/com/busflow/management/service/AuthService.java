@@ -14,20 +14,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
-//    private final UserAuthService userAuthService;
     private final PasswordAuthService passwordAuthService;
     private final JwtService jwtService;
     private final UserRepository userRepository;
-//    private final AuthMapper authMapper;
-
 
     public LoginResponseDTO login(LoginRequestDTO request) {
-//        User user = userAuthService.getUserbyUsername(request.getUsername());
-//
-//        passwordAuthService.validate(request.getPassword(), user.getPassword());
-//        String token = jwtService.generateToken(user);
-//
-//        return  new LoginResponseDTO(user.getId(), user.getRole().name(), token);
 
         // Try to fetch user
         User user = userRepository.findByUsername(request.getUsername())

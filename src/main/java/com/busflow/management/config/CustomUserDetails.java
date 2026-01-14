@@ -1,4 +1,5 @@
 package com.busflow.management.config;
+import com.busflow.management.entity.User;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -9,26 +10,30 @@ import java.util.List;
 
 @Getter
 public class CustomUserDetails implements UserDetails {
-    private Long id;
-    private String username;
-    private String role;
 
+    private final User user;
 
-    public CustomUserDetails(Long id, String username, String password) {
-        this.id = id;
-        this.username = username;
-        this.role = role;
+    public CustomUserDetails(User user) {
+        this.user = user;
+    }
 
+    public User getUser() {
+        return user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_"+role));
+        return List.of(new SimpleGrantedAuthority("ROLE_"+ user.getRole().name()));
     }
 
     @Override
     public String getPassword() {
-        return null;
+        return user.getPassword();
+    }
+
+    @Override
+    public String getUsername() {
+        return user.getUsername();
     }
 
     @Override

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/buses")
 @RequiredArgsConstructor
-public class BusController {
+public class  BusController {
 
     private final BusAssignmentService busAssignmentService;
 
