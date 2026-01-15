@@ -14,7 +14,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class HireInfo {
     private Integer numberOfDays;
-    private LocalDate date;
     private String fromLocation;
     private String destination;
     private BigDecimal otherExpense;

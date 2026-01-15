@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Embeddable
 @Getter
@@ -13,6 +14,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class TripInfo {
     private Integer numberOfTrips;
+//    private LocalDate date;
     private BigDecimal fromAmount;
     private BigDecimal toAmount;
     private BigDecimal otherExpense;

@@ -44,6 +44,7 @@ public class IncomeService {
         // 4. Create and populate income
         Income income = new Income();
         income.setIncomeType(request.getType());
+        income.setDate(request.getDate());
         income.setBus(bus);
         income.setCreatedBy(authUser);
 
@@ -80,8 +81,8 @@ public class IncomeService {
     private TripInfo mapTripInfo(TripIncomeDTO dto) {
         TripInfo info = new TripInfo();
         info.setNumberOfTrips(dto.getNoOfTrips());
-        info.setFromAmount(dto.getFromAmount());
-        info.setToAmount(dto.getToAmount());
+        info.setFromAmount(dto.getOnwardTripAmount());
+        info.setToAmount(dto.getOnwardTripAmount());
         info.setOtherExpense(dto.getOtherExpense() != null ? dto.getOtherExpense() : BigDecimal.ZERO);
         info.setDriverSalary(dto.getDriverSalary());
         info.setConductorSalary(dto.getConductorSalary());
@@ -91,7 +92,7 @@ public class IncomeService {
     private HireInfo mapHireInfo(HireIncomeDTO dto) {
         HireInfo info = new HireInfo();
         info.setNumberOfDays(dto.getNoOfDays());
-        info.setFromLocation(dto.getFromLocation());
+        info.setFromLocation(dto.getOrigin());
         info.setDestination(dto.getDestination());
         info.setOtherExpense(dto.getOtherExpense() != null ? dto.getOtherExpense() : BigDecimal.ZERO);
         info.setDriverSalary(dto.getDriverSalary());

@@ -2,12 +2,14 @@ package com.busflow.management.entity;
 
 import com.busflow.management.enums.IncomeType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -21,6 +23,9 @@ public class Income extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private LocalDate date;
+
+    @NotNull
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)  // Store as STRING in DB (recommended)
@@ -41,6 +46,7 @@ public class Income extends BaseEntity {
     @AttributeOverrides({
             @AttributeOverride(name = "numberOfTrips", column = @Column(name = "trip_number_of_trips")),
             @AttributeOverride(name = "fromAmount", column = @Column(name = "trip_from_amount")),
+            @AttributeOverride(name = "date", column = @Column(name = "trip_date")),
             @AttributeOverride(name = "toAmount", column = @Column(name = "trip_to_amount")),
             @AttributeOverride(name = "otherExpense", column = @Column(name = "trip_other_expense")),
             @AttributeOverride(name = "driverSalary", column = @Column(name = "trip_driver_salary")),
@@ -52,6 +58,7 @@ public class Income extends BaseEntity {
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "numberOfDays", column = @Column(name = "hire_number_of_days")),
+            @AttributeOverride(name = "date", column = @Column(name = "hire_date")),
             @AttributeOverride(name = "fromLocation", column = @Column(name = "hire_from_location")),
             @AttributeOverride(name = "destination", column = @Column(name = "hire_destination")),
             @AttributeOverride(name = "otherExpense", column = @Column(name = "hire_other_expense")),
