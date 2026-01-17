@@ -2,6 +2,7 @@ package com.busflow.management.controller;
 import com.busflow.management.dto.LoginRequestDTO;
 import com.busflow.management.dto.LoginResponseDTO;
 import com.busflow.management.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +19,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginResponseDTO login(@RequestBody LoginRequestDTO request) {
+    public LoginResponseDTO login(@Valid @RequestBody LoginRequestDTO request) {
         return authService.login(request);
     }
 }
