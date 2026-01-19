@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface IncomeRepository extends JpaRepository<Income, Long> {
 //
 //    @Query("""
@@ -15,6 +17,9 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
 //        AND i.createdAt < CURRENT_DATE + 7
 //    """)
 
+
+
+    List<Income> findByBusIdIn(List<Long> busIds);
 
     @Query("""
     SELECT COALESCE(SUM(i.amount), 0)

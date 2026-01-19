@@ -3,10 +3,7 @@ package com.busflow.management.entity;
 import com.busflow.management.enums.IncomeType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,21 +14,21 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Income extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate date;
+    @Column(nullable = false)
+    private LocalDate transactionDate;
 
     @NotNull
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)  // Store as STRING in DB (recommended)
     private IncomeType incomeType;
-
-    private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bus_id")

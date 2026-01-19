@@ -8,6 +8,9 @@ import com.busflow.management.dto.TripIncomeDTO;
 import com.busflow.management.entity.*;
 import com.busflow.management.enums.IncomeType;
 import com.busflow.management.enums.Role;
+import com.busflow.management.exception.ResourceNotFoundException;
+import com.busflow.management.repository.BusAssignmentRepository;
+import com.busflow.management.repository.BusRepository;
 import com.busflow.management.repository.IncomeRepository;
 import com.busflow.management.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,36 +18,52 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class IncomeService {
 
     private final IncomeRepository incomeRepository;
-    private final UserRepository userRepository;
+    private final BusRepository busRepository;
+    private final BusAssignmentRepository busAssignmentRepository;
 
 
     @Transactional
-    public IncomeResponseDTO addIncome(IncomeRequestDTO request, User authUser) {
+    public IncomeResponseDTO addIncome(Long busId, IncomeRequestDTO request, User authUser) {
+
+        // Validate user has permission for this bus
+        validateBusAccess(authUser, busId);
+
+        // Get the bus
+        Bus bus = busRepository.findById(busId).orElseThrow(()-> new ResourceNotFoundException("Bus not found with id: " + busId) );
+
+        // Validate type specific data
+        validateIncomeRequest(request);
+
+//        Create and populate income
+//        Income income = new Income();
+
+
 
         // 1. Validate user role
-        if (authUser.getRole() != Role.CONDUCTOR) {
-            throw new RuntimeException("Only conductors can add income");
-        }
-
-        // 2. Validate bus assignment
-        Bus bus = authUser.getBus();
-        if (bus == null) {
-            throw new RuntimeException("User is not assigned to any bus");
-        }
-
-        // 3. Validate type-specific data
-        validateIncomeRequest(request);
+//        if (authUser.getRole() != Role.CONDUCTOR) {
+//            throw new RuntimeException("Only conductors can add income");
+//        }
+//
+//        // 2. Validate bus assignment
+//        Bus bus = authUser.getBus();
+//        if (bus == null) {
+//            throw new RuntimeException("User is not assigned to any bus");
+//        }
+//
+//        // 3. Validate type-specific data
+//        validateIncomeRequest(request);
 
         // 4. Create and populate income
         Income income = new Income();
         income.setIncomeType(request.getType());
-        income.setDate(request.getDate());
+        income.setTransactionDate(request.getDate());
         income.setBus(bus);
         income.setCreatedBy(authUser);
 
@@ -65,6 +84,85 @@ public class IncomeService {
 
         }
 
+    // ✅ NEW: Get all incomes for buses the user has access to
+    @Transactional(readOnly = true)
+    public List<IncomeResponseDTO> getMyIncomes(User authUser) {
+        List<Long> accessibleBusIds = getAccessibleBusIds(authUser);
+
+        List<Income> incomes = incomeRepository.findByBusIdIn(accessibleBusIds);
+        return incomes.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    // ✅ NEW: Get income by ID with access check
+    @Transactional(readOnly = true)
+    public IncomeResponseDTO getIncomeById(Long incomeId, User authUser) {
+        Income income = incomeRepository.findById(incomeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Income not found with id: " + incomeId));
+
+        // Verify user has access to this income's bus
+        validateBusAccess(authUser, income.getBus().getId());
+
+        return mapToResponse(income);
+    }
+
+    // ================== CRITICAL: ACCESS CONTROL ==================
+
+    /**
+     * ✅ Validates if user has permission to access the given bus
+     * - OWNER: Can access ANY bus they own
+     * - CONDUCTOR: Can only access buses they're assigned to (and assignment is active)
+     */
+    private void validateBusAccess(User user, Long busId) {
+        if (user.getRole() == Role.OWNER) {
+            // Owner can access any bus they own
+            Bus bus = busRepository.findById(busId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Bus not found"));
+
+            if (!bus.getOwner().getId().equals(user.getId())) {
+//                throw new UnauthorizedException("You don't own this bus");
+                throw new ResourceNotFoundException("You don't own this bus");
+            }
+        } else if (user.getRole() == Role.CONDUCTOR) {
+            // Conductor must have active assignment
+            boolean hasAccess = busAssignmentRepository
+                    .existsByUserIdAndBusIdAndIsActiveTrue(user.getId(), busId);
+
+            if (!hasAccess) {
+                throw new ResourceNotFoundException(
+                        "You don't have access to bus ID: " + busId
+                );
+            }
+        } else {
+            throw new ResourceNotFoundException("Invalid role for this operation");
+        }
+    }
+
+
+    /**
+     * ✅ Get list of bus IDs the user can access
+     */
+    private List<Long> getAccessibleBusIds(User user) {
+        if (user.getRole() == Role.OWNER) {
+            // Owner gets all their buses
+            return busRepository.findByOwnerId(user.getId())
+                    .stream()
+                    .map(Bus::getId)
+                    .toList();
+        } else if (user.getRole() == Role.CONDUCTOR) {
+            // Conductor gets only assigned buses
+            return busAssignmentRepository
+                    .findByUserIdAndIsActiveTrue(user.getId())
+                    .stream()
+                    .map(assignment -> assignment.getBus().getId())
+                    .toList();
+        }
+        return List.of(); // Empty list for other roles
+    }
+
+
+
     // ------------------ VALIDATION ------------------
 
     private void validateIncomeRequest(IncomeRequestDTO request) {
@@ -82,7 +180,7 @@ public class IncomeService {
         TripInfo info = new TripInfo();
         info.setNumberOfTrips(dto.getNoOfTrips());
         info.setFromAmount(dto.getOnwardTripAmount());
-        info.setToAmount(dto.getOnwardTripAmount());
+        info.setToAmount(dto.getReturnTripAmount());
         info.setOtherExpense(dto.getOtherExpense() != null ? dto.getOtherExpense() : BigDecimal.ZERO);
         info.setDriverSalary(dto.getDriverSalary());
         info.setConductorSalary(dto.getConductorSalary());

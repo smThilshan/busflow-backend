@@ -37,24 +37,24 @@ public class BusAssignmentService {
         Bus bus = busRepository.findById(request.getBusId())
                 .orElseThrow(() -> new RuntimeException("Bus not found"));
 
-        conductor.setBus(bus);
+//        conductor.setBus(bus);
         userRepository.save(conductor);
     }
 
-    @Service
-    @RequiredArgsConstructor
-    public static class PasswordAuthService {
-
-        private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
-        private String hash(String rawPassword) {
-            return encoder.encode(rawPassword);
-        }
-
-        public void validate(String rawPassword, String hashedPassword) {
-            if (!encoder.matches(rawPassword, hashedPassword)) {
-                throw new InvalidCredentialsException("Invalid username or password");
-            }
-        }
-    }
+//    @Service
+//    @RequiredArgsConstructor
+//    public static class PasswordAuthService {
+//
+//        private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+//
+//        private String hash(String rawPassword) {
+//            return encoder.encode(rawPassword);
+//        }
+//
+//        public void validate(String rawPassword, String hashedPassword) {
+//            if (!encoder.matches(rawPassword, hashedPassword)) {
+//                throw new InvalidCredentialsException("Invalid username or password");
+//            }
+//        }
+//    }
 }

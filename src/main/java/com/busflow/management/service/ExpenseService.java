@@ -12,6 +12,8 @@ import com.busflow.management.repository.ExpenseRepository;
 import com.busflow.management.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 public class ExpenseService {
     private final ExpenseRepository expenseRepository;
@@ -32,16 +34,16 @@ public class ExpenseService {
         }
 
         // 3. Assigned bus check
-        Bus bus = user.getBus();
-        if (bus == null) {
-            throw new RuntimeException("User is not assigned to any bus");
-        }
+//        Bus bus = user.getBus();
+//        if (bus == null) {
+//            throw new RuntimeException("User is not assigned to any bus");
+//        }
 
         // 4. Save expense
         Expense expense = new Expense();
-        expense.setAmount(request.getAmount());
+        expense.setAmount(BigDecimal.valueOf(request.getAmount()));
         expense.setCategory(request.getDescription());
-        expense.setBus(bus);
+//        expense.setBus(bus);
 
         Expense savedExpense = expenseRepository.save(expense);
 
@@ -55,10 +57,10 @@ public class ExpenseService {
 
         User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("User Not Found"));
 
-        Bus bus = user.getBus();
-        if (bus == null) {
-            throw new RuntimeException("User not assigned to a bus");
-        }
+//        Bus bus = user.getBus();
+//        if (bus == null) {
+//            throw new RuntimeException("User not assigned to a bus");
+//        }
 
         Expense expense = expenseRepository.findById(expenseId).orElseThrow(()-> new RuntimeException("Expense Not Found"));
         return new ExpenseResponseDTO(

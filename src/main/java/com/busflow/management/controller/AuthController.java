@@ -3,6 +3,7 @@ import com.busflow.management.dto.LoginRequestDTO;
 import com.busflow.management.dto.LoginResponseDTO;
 import com.busflow.management.service.AuthService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginResponseDTO login(@Valid @RequestBody LoginRequestDTO request) {
-        return authService.login(request);
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
+        LoginResponseDTO response = authService.login(request);
+        return ResponseEntity.ok(response);
     }
+
 }

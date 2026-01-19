@@ -1,16 +1,16 @@
 package com.busflow.management.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Bus extends BaseEntity {
 
     @Id
@@ -19,4 +19,11 @@ public class Bus extends BaseEntity {
 
     @Column(nullable = false, unique = true)
     private String busNumber;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    public User owner;
+
+    @OneToMany(mappedBy = "bus")
+    private List<BusAssignment> assignments;
 }

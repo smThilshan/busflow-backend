@@ -1,0 +1,206 @@
+---- =====================================================
+---- CLEAN SLATE (Optional - removes existing data)
+---- =====================================================
+---- DELETE FROM income;
+---- DELETE FROM expense;
+---- DELETE FROM bus_assignments;
+---- DELETE FROM bus;
+---- DELETE FROM users;
+--
+---- =====================================================
+---- 1. USERS (Must come first - OWNER and CONDUCTOR)
+---- =====================================================
+---- Note: Passwords will be set by DataLoader with bcrypt encoding
+---- We're just inserting placeholder IDs here for SQL relationships
+--
+---- =====================================================
+---- 2. BUSES (with owner_id foreign key)
+---- =====================================================
+---- Owner 1 owns both buses
+--INSERT INTO bus (id, bus_number, owner_id, created_at, updated_at)
+--VALUES (1, 'NB-2231', 1, NOW(), NOW());
+--
+--INSERT INTO bus (id, bus_number, owner_id, created_at, updated_at)
+--VALUES (2, 'NB-2089', 1, NOW(), NOW());
+--
+---- =====================================================
+---- 3. BUS ASSIGNMENTS (Conductor assigned to buses)
+---- =====================================================
+---- Conductor 1 (id=2) is assigned to Bus 1 by Owner 1
+--INSERT INTO bus_assignments (id, user_id, bus_id, assigned_by_id, is_active, assigned_date, created_at, updated_at)
+--VALUES (1, 2, 1, 1, true, NOW(), NOW(), NOW());
+--
+---- Optionally assign conductor to second bus as well
+--INSERT INTO bus_assignments (id, user_id, bus_id, assigned_by_id, is_active, assigned_date, created_at, updated_at)
+--VALUES (2, 2, 2, 1, true, NOW(), NOW(), NOW());
+--
+---- =====================================================
+---- 4. INCOME (with created_by_id for audit trail)
+---- =====================================================
+---- Trip income for Bus 1, added by conductor
+--INSERT INTO income (
+--    id,
+--    transaction_date,
+--    amount,
+--    income_type,
+--    bus_id,
+--    created_by_id,
+--    trip_number_of_trips,
+--    trip_from_amount,
+--    trip_to_amount,
+--    trip_other_expense,
+--    trip_driver_salary,
+--    trip_conductor_salary,
+--    created_at,
+--    updated_at
+--)
+--VALUES (
+--    1,
+--    CURRENT_DATE,
+--    5000.00,
+--    'TRIP',
+--    1,
+--    2,  -- created by conductor
+--    2,  -- 2 trips
+--    3000.00,
+--    2500.00,
+--    200.00,
+--    250.00,
+--    150.00,
+--    NOW(),
+--    NOW()
+--);
+--
+---- Hire income for Bus 1, added by owner
+--INSERT INTO income (
+--    id,
+--    transaction_date,
+--    amount,
+--    income_type,
+--    bus_id,
+--    created_by_id,
+--    hire_number_of_days,
+--    hire_from_location,
+--    hire_destination,
+--    hire_other_expense,
+--    hire_driver_salary,
+--    hire_conductor_salary,
+--    created_at,
+--    updated_at
+--)
+--VALUES (
+--    2,
+--    CURRENT_DATE - 1,
+--    8000.00,
+--    'HIRE',
+--    1,
+--    1,  -- created by owner
+--    3,  -- 3 days
+--    'Colombo',
+--    'Kandy',
+--    500.00,
+--    1500.00,
+--    1000.00,
+--    NOW(),
+--    NOW()
+--);
+--
+---- Trip income for Bus 2
+--INSERT INTO income (
+--    id,
+--    transaction_date,
+--    amount,
+--    income_type,
+--    bus_id,
+--    created_by_id,
+--    trip_number_of_trips,
+--    trip_from_amount,
+--    trip_to_amount,
+--    trip_other_expense,
+--    trip_driver_salary,
+--    trip_conductor_salary,
+--    created_at,
+--    updated_at
+--)
+--VALUES (
+--    3,
+--    CURRENT_DATE,
+--    4500.00,
+--    'TRIP',
+--    2,
+--    2,  -- created by conductor
+--    3,
+--    2000.00,
+--    1800.00,
+--    150.00,
+--    200.00,
+--    150.00,
+--    NOW(),
+--    NOW()
+--);
+--
+---- =====================================================
+---- 5. EXPENSES (with created_by_id for audit trail)
+---- =====================================================
+--INSERT INTO expense (
+--    id,
+--    transaction_date,
+--    amount,
+--    category,
+--    bus_id,
+--    created_by_id,
+--    created_at,
+--    updated_at
+--)
+--VALUES (
+--    1,
+--    CURRENT_DATE,
+--    1000.00,
+--    'Fuel',
+--    1,
+--    2,  -- created by conductor
+--    NOW(),
+--    NOW()
+--);
+--
+--INSERT INTO expense (
+--    id,
+--    transaction_date,
+--    amount,
+--    category,
+--    bus_id,
+--    created_by_id,
+--    created_at,
+--    updated_at
+--)
+--VALUES (
+--    2,
+--    CURRENT_DATE - 2,
+--    500.00,
+--    'Maintenance',
+--    2,
+--    1,  -- created by owner
+--    NOW(),
+--    NOW()
+--);
+--
+--INSERT INTO expense (
+--    id,
+--    transaction_date,
+--    amount,
+--    category,
+--    bus_id,
+--    created_by_id,
+--    created_at,
+--    updated_at
+--)
+--VALUES (
+--    3,
+--    CURRENT_DATE,
+--    300.00,
+--    'Tire Replacement',
+--    1,
+--    2,  -- created by conductor
+--    NOW(),
+--    NOW()
+--);
