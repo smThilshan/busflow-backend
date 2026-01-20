@@ -20,7 +20,7 @@ public class Bus extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String busNumber;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "owner_id", nullable = false)
     public User owner;
 

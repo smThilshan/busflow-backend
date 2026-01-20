@@ -24,6 +24,7 @@ public class UserController {
 
 //    create new conductor (OWNER only)
 
+    @PreAuthorize("hasRole('OWNER')")
     @PostMapping("/conductors")
     public ResponseEntity<UserResponseDTO> createConductor(@Valid @RequestBody CreateConductorRequestDTO request, @AuthenticationPrincipal CustomUserDetails userDetails) {
         UserResponseDTO response = userService.createConductor(request,userDetails.getUser());
