@@ -26,7 +26,7 @@ public class  BusController {
 
 //    Create bus (OWNER only)
 @PostMapping
-//@PreAuthorize("hasRole('OWNER')")
+@PreAuthorize("hasRole('OWNER')")
 public ResponseEntity<BusResponseDTO> createBus(
         @Valid @RequestBody BusRequestDTO request,
         @AuthenticationPrincipal CustomUserDetails userDetails) {

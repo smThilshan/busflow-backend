@@ -11,9 +11,18 @@ public interface BusAssignmentRepository  extends JpaRepository<BusAssignment, L
 //    check if user has active access  to bus
     boolean existsByUserIdAndBusIdAndIsActiveTrue(Long userId, Long busId);
 
-//    get all active buses for a conductor
+//    get all conductors for the bus
     List<BusAssignment> findByUserIdAndIsActiveTrue(Long userId);
 
-//    get all conductors fot a bus
+//    get all active buses for a conductor
     List<BusAssignment> findByBusIdAndIsActiveTrue(Long busId);
+
+    // Get all assignments for a user (active and inactive)
+    List<BusAssignment> findByUserId(Long userId);
+
+    // Get all assignments for a bus (active and inactive)
+    List<BusAssignment> findByBusId(Long busId);
+
+    // Get all assignments for multiple buses
+    List<BusAssignment> findByBusIdIn(List<Long> busIds);
 }

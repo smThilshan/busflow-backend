@@ -6,6 +6,7 @@ import com.busflow.management.entity.Bus;
 import com.busflow.management.entity.BusAssignment;
 import com.busflow.management.entity.User;
 import com.busflow.management.enums.Role;
+import com.busflow.management.exception.ResourceAlreadyExistsException;
 import com.busflow.management.exception.ResourceNotFoundException;
 import com.busflow.management.exception.UnauthorizedException;
 import com.busflow.management.repository.BusAssignmentRepository;
@@ -41,7 +42,7 @@ public class BusService {
 
         // Check if bus number already exists
         if (busRepository.existsByBusNumber(request.getBusNumber())){
-            throw new IllegalArgumentException("Bus number already exists: " + request.getBusNumber());
+            throw new ResourceAlreadyExistsException("Bus number already exists: " + request.getBusNumber());
         }
 
 //       Create bus
