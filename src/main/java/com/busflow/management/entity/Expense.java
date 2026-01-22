@@ -23,7 +23,6 @@ public class Expense extends BaseEntity {
     @Column(nullable = false)
     private LocalDate transactionDate;
 
-
     private BigDecimal amount;
 
     private String category;

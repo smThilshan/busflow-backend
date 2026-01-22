@@ -161,6 +161,10 @@ public class IncomeService {
         return List.of(); // Empty list for other roles
     }
 
+    public List<IncomeResponseDTO> getIncomeByBus(Long busId, User user) {
+        return null;
+    }
+
 
 
     // ------------------ VALIDATION ------------------
@@ -232,6 +236,7 @@ public class IncomeService {
                 income.getAmount()
         );
     }
+
 
 
 
