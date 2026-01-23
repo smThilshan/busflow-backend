@@ -26,6 +26,7 @@ public class TripIncomeDTO {
     @Positive(message = "Return trip amount must be greater than zero")
     private BigDecimal returnTripAmount;
 
+    // Other expense should come as  optional in future
     @NotNull(message = "Other expenses amount is required")
     @PositiveOrZero(message = "Other expenses cannot be negative")
     private BigDecimal otherExpense;

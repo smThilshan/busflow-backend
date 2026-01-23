@@ -14,7 +14,6 @@ import java.time.LocalDate;
 @Builder
 public class TripInfo {
     private Integer numberOfTrips;
-//    private LocalDate date;
     private BigDecimal fromAmount;
     private BigDecimal toAmount;
     private BigDecimal otherExpense;

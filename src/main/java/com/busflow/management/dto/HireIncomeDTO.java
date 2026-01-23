@@ -26,7 +26,7 @@ public class HireIncomeDTO {
     @NotBlank(message = "Hire end destination is required")
     private String destination;
 
-
+    // Other expense should come as  optional in future
     @NotNull(message = "Other expenses amount is required")
     @PositiveOrZero(message = "Other expenses cannot be negative")
     private BigDecimal otherExpense;
