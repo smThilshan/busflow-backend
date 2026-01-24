@@ -14,9 +14,9 @@ public class HireIncomeDTO {
     @Max(value = 30, message = "Number of hire days cannot exceed 30")
     private Integer noOfDays;
 
-    @NotNull(message = "Date is required")
-    @PastOrPresent(message = "Selected date should be present or past")
-    private LocalDate date;
+//    @NotNull(message = "Date is required")
+//    @PastOrPresent(message = "Selected date should be present or past")
+//    private LocalDate date;
 
     // Starting location of the hire
     @NotBlank(message = "Hire start location is required")
@@ -25,6 +25,10 @@ public class HireIncomeDTO {
     // Destination of the hire
     @NotBlank(message = "Hire end destination is required")
     private String destination;
+
+    @NotNull(message = "Hire amount is required")
+    @Positive(message = "Hire amount must be greater than zero")
+    private BigDecimal hireAmount;
 
     // Other expense should come as  optional in future
     @NotNull(message = "Other expenses amount is required")

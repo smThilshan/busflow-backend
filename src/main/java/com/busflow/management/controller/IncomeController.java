@@ -3,6 +3,7 @@ package com.busflow.management.controller;
 import com.busflow.management.config.CustomUserDetails;
 import com.busflow.management.dto.IncomeRequestDTO;
 import com.busflow.management.dto.IncomeResponseDTO;
+import com.busflow.management.enums.IncomeType;
 import com.busflow.management.service.IncomeService;
 import com.sun.security.auth.UserPrincipal;
 import jakarta.validation.Valid;
@@ -58,7 +59,7 @@ public class IncomeController {
             @PathVariable Long busId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ){
-        List<IncomeResponseDTO> incomes = incomeService.getIncomeByBus(busId, userDetails.getUser());
+        List<IncomeResponseDTO> incomes = incomeService.getIncomesByBus(busId, userDetails.getUser());
 
         return ResponseEntity.ok(incomes);
     }
@@ -88,11 +89,22 @@ public class IncomeController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @AuthenticationPrincipal CustomUserDetails userDetails
             ){
-        List<IncomeResponseDTO> incomes = incomeService.getIncomesByDateRange(
+        List<IncomeResponseDTO> response = incomeService.getIncomesByDateRange(
                 startDate, endDate, userDetails.getUser()
         );
 
+        return ResponseEntity.ok(response);
+    }
+
+    // Get income byt type
+    @GetMapping("/by-type")
+    public ResponseEntity<List<IncomeResponseDTO>> getIncomesByType(
+            @RequestParam IncomeType incomeType,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+            ){
+        List<IncomeResponseDTO> incomes = incomeService.getIncomesByType(incomeType, userDetails.getUser());
         return ResponseEntity.ok(incomes);
+
     }
 
     // Delete income (OWNER only or creator)

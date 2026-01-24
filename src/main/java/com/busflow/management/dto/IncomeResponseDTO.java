@@ -20,13 +20,13 @@ public class IncomeResponseDTO {
 
     private Long id;
     private IncomeType incomeType;
-    private BigDecimal amount;
+    private BigDecimal profitAmount;
     private LocalDate transactionDate;
     private Long busId;
     private String busNumber;
     private String createdBy;
-//    private TripInfo tripInfo;  // Populated if type = TRIP
-//    private HireInfo hireInfo;  // Populated if type = HIRE
+    private TripInfo tripInfo;  // Populated if type = TRIP
+    private HireInfo hireInfo;  // Populated if type = HIRE
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

@@ -14,8 +14,8 @@ import java.time.LocalDate;
 @Builder
 public class TripInfo {
     private Integer numberOfTrips;
-    private BigDecimal fromAmount;
-    private BigDecimal toAmount;
+    private BigDecimal onwardTripAmount;
+    private BigDecimal returnTripAmount;
     private BigDecimal otherExpense;
     private BigDecimal driverSalary;
     private BigDecimal conductorSalary;

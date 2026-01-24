@@ -16,6 +16,7 @@ public class HireInfo {
     private Integer numberOfDays;
     private String fromLocation;
     private String destination;
+    private BigDecimal hireAmount;
     private BigDecimal otherExpense;
     private BigDecimal driverSalary;
     private BigDecimal conductorSalary;

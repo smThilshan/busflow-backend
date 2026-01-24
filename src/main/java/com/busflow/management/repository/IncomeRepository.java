@@ -1,25 +1,16 @@
 package com.busflow.management.repository;
 
 import com.busflow.management.entity.Income;
+import com.busflow.management.enums.IncomeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface IncomeRepository extends JpaRepository<Income, Long> {
-//
-//    @Query("""
-//        SELECT COALESCE(SUM(i.amount), 0)
-//        FROM Income i
-//        WHERE i.bus.id = :busId
-//        AND i.createdAt >= CURRENT_DATE
-//        AND i.createdAt < CURRENT_DATE + 7
-//    """)
 
-
-
-    List<Income> findByBusIdIn(List<Long> busIds);
 
     @Query("""
     SELECT COALESCE(SUM(i.amount), 0)
@@ -35,6 +26,17 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
     );
 
 
-//    Double getWeeklyIncomeByBus(@Param("busId") Long busId);
+    List<Income> findByBusId(Long busId);
+
+    List<Income> findByBusIdIn(List<Long> busIds);
+
+    List<Income> findByBusIdInAndTransactionDateBetween(List<Long> busIds, LocalDate startDate, LocalDate endDate);
+
+    List<Income> findByBusIdAndTransactionDateBetween(Long busId, LocalDate startDate, LocalDate endDate);
+
+    List<Income> findByBusIdInAndIncomeType(List<Long> busIds, IncomeType incomeType);
+
+    List<Income> findByBusIdAndIncomeType(Long busId, IncomeType incomeType);
 
 }
+

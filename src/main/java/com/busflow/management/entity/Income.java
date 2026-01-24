@@ -59,6 +59,7 @@ public class Income extends BaseEntity {
             @AttributeOverride(name = "fromLocation", column = @Column(name = "hire_from_location")),
             @AttributeOverride(name = "destination", column = @Column(name = "hire_destination")),
             @AttributeOverride(name = "otherExpense", column = @Column(name = "hire_other_expense")),
+            @AttributeOverride(name = "hireAmount", column = @Column(name = "hire_amount")),
             @AttributeOverride(name = "driverSalary", column = @Column(name = "hire_driver_salary")),
             @AttributeOverride(name = "conductorSalary", column = @Column(name = "hire_conductor_salary"))
     })

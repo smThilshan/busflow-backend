@@ -9,19 +9,24 @@ import com.busflow.management.entity.*;
 import com.busflow.management.enums.IncomeType;
 import com.busflow.management.enums.Role;
 import com.busflow.management.exception.ResourceNotFoundException;
+import com.busflow.management.exception.UnauthorizedException;
 import com.busflow.management.repository.BusAssignmentRepository;
 import com.busflow.management.repository.BusRepository;
 import com.busflow.management.repository.IncomeRepository;
 import com.busflow.management.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class IncomeService {
 
     private final IncomeRepository incomeRepository;
@@ -29,6 +34,9 @@ public class IncomeService {
     private final BusAssignmentRepository busAssignmentRepository;
 
 
+    /**
+     * Add income to a specific bus
+     */
     @Transactional
     public IncomeResponseDTO addIncome(Long busId, IncomeRequestDTO request, User authUser) {
 
@@ -42,32 +50,16 @@ public class IncomeService {
         validateIncomeRequest(request);
 
 //        Create and populate income
-//        Income income = new Income();
+        Income income = Income.builder()
+                .incomeType(request.getType())
+                .transactionDate(request.getDate())
+                .bus(bus)
+                .createdBy(authUser)
+                .build();
 
 
 
-        // 1. Validate user role
-//        if (authUser.getRole() != Role.CONDUCTOR) {
-//            throw new RuntimeException("Only conductors can add income");
-//        }
-//
-//        // 2. Validate bus assignment
-//        Bus bus = authUser.getBus();
-//        if (bus == null) {
-//            throw new RuntimeException("User is not assigned to any bus");
-//        }
-//
-//        // 3. Validate type-specific data
-//        validateIncomeRequest(request);
-
-        // 4. Create and populate income
-        Income income = new Income();
-        income.setIncomeType(request.getType());
-        income.setTransactionDate(request.getDate());
-        income.setBus(bus);
-        income.setCreatedBy(authUser);
-
-        // 5. Set type-specific info and calculate amount
+        //  Set type-specific info and calculate amount
         if (request.getType() == IncomeType.TRIP) {
             TripInfo tripInfo = mapTripInfo(request.getTrip());
             income.setTripInfo(tripInfo);
@@ -78,34 +70,174 @@ public class IncomeService {
             income.setAmount(calculateHireAmount(hireInfo));
         }
 
-        // 6. Save and return
-        Income saved = incomeRepository.save(income);
-        return mapToResponse(saved);
+        // Save and return
+        Income savedIncome = incomeRepository.save(income);
+
+
+        log.info("User {} added {} income {} for bus {}",
+                authUser.getUsername(), request.getType(), savedIncome.getId(), bus.getBusNumber());
+
+
+        return mapToResponseDTO(savedIncome);
 
         }
 
-    // ✅ NEW: Get all incomes for buses the user has access to
+    /**
+     * Get all incomes user has access to
+     */
     @Transactional(readOnly = true)
     public List<IncomeResponseDTO> getMyIncomes(User authUser) {
         List<Long> accessibleBusIds = getAccessibleBusIds(authUser);
 
         List<Income> incomes = incomeRepository.findByBusIdIn(accessibleBusIds);
         return incomes.stream()
-                .map(this::mapToResponse)
-                .toList();
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    // ✅ NEW: Get income by ID with access check
+    /**
+     * Get incomes for a specific bus
+     */
+    @Transactional(readOnly = true)
+    public List<IncomeResponseDTO> getIncomesByBus(Long busId, User authUser) {
+
+        // Validate access
+        validateBusAccess(authUser, busId);
+
+        List<Income> incomes = incomeRepository.findByBusId(busId);
+
+        return incomes.stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+
+
+    /**
+     * Get income by ID
+     */
     @Transactional(readOnly = true)
     public IncomeResponseDTO getIncomeById(Long incomeId, User authUser) {
+
         Income income = incomeRepository.findById(incomeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Income not found with id: " + incomeId));
 
-        // Verify user has access to this income's bus
+        // Validate user has access to this income's bus
         validateBusAccess(authUser, income.getBus().getId());
 
-        return mapToResponse(income);
+        return mapToResponseDTO(income);
     }
+
+    /**
+     * Get incomes by date range
+     */
+    @Transactional(readOnly = true)
+    public List<IncomeResponseDTO> getIncomesByDateRange(LocalDate startDate, LocalDate endDate, User authUser) {
+
+        List<Long>  accessibleBusIds = getAccessibleBusIds(authUser);
+
+        List<Income> incomes = incomeRepository.findByBusIdInAndTransactionDateBetween(accessibleBusIds, startDate, endDate);
+
+        return incomes.stream().map(this::mapToResponseDTO).collect(Collectors.toList());
+    }
+
+    /**
+     * Get incomes for a specific bus by date range
+     */
+    @Transactional(readOnly = true)
+    public List<IncomeResponseDTO> getIncomesByBusAndDateRange(Long busId, LocalDate startDate, LocalDate endDate, User authUser) {
+
+        // validate access
+        validateBusAccess(authUser, busId);
+
+        List<Income> incomes = incomeRepository.findByBusIdAndTransactionDateBetween(busId, startDate, endDate);
+
+        return incomes.stream().map(this::mapToResponseDTO).collect(Collectors.toList());
+    }
+
+    /*
+    Get income by type
+     */
+    @Transactional(readOnly = true)
+    public List<IncomeResponseDTO>  getIncomesByType(IncomeType incomeType, User authUser) {
+        List<Long>  accessibleBusIds = getAccessibleBusIds(authUser);
+
+        List<Income> incomes = incomeRepository.findByBusIdInAndIncomeType(accessibleBusIds, incomeType);
+
+        return incomes.stream().map(this::mapToResponseDTO).collect(Collectors.toList());
+    }
+
+
+
+    /**
+     * Update income
+     */
+    @Transactional
+    public IncomeResponseDTO updateIncome(Long incomeId, IncomeRequestDTO request, User authUser) {
+
+        Income income = incomeRepository.findById(incomeId).orElseThrow(()-> new ResourceNotFoundException("Income not found with id: " + incomeId));
+
+        // validate bus access
+        validateBusAccess(authUser, income.getBus().getId());
+
+        // Only owner or the creator can update
+        if (authUser.getRole() != Role.OWNER && !income.getCreatedBy().getId().equals(authUser.getId())) {
+            throw  new UnauthorizedException("You or Owner can only update your own incomes");
+        }
+
+        //validate request
+        validateIncomeRequest(request);
+
+//      // Update fields
+        income.setIncomeType(request.getType());
+        income.setTransactionDate(request.getDate());
+
+        // Update the specific info
+        if (request.getType() == IncomeType.TRIP) {
+            TripInfo tripInfo = mapTripInfo(request.getTrip());
+            income.setTripInfo(tripInfo);
+            income.setHireInfo(null); // Clear hire info
+            income.setAmount(calculateTripAmount(tripInfo));
+        } else if (request.getType() == IncomeType.HIRE) {
+            HireInfo hireInfo = mapHireInfo(request.getHire());
+            income.setHireInfo(hireInfo);
+            income.setTripInfo(null);
+            income.setAmount(calculateHireAmount(hireInfo));
+        }
+
+        Income updatedIncome = incomeRepository.save(income);
+
+        log.info("User {} updated income {}", authUser.getUsername(), incomeId);
+
+        return mapToResponseDTO(updatedIncome);
+
+    }
+
+    /**
+     * Delete income
+     */
+    @Transactional
+    public void deleteIncome(Long incomeId, User authUser) {
+
+        Income income = incomeRepository.findById(incomeId).orElseThrow(()-> new ResourceNotFoundException("Income not found with id: " + incomeId));
+
+        // validate access
+        validateBusAccess(authUser, income.getBus().getId());
+
+        // Only owner or the creator can delete
+        if (authUser.getRole() != Role.OWNER &&  !income.getCreatedBy().getId().equals(authUser.getId())) {
+            throw new UnauthorizedException("You or Owner can only delete your own incomes");
+        }
+
+        incomeRepository.delete(income);
+
+        log.info("User {} deleted income {}", authUser.getUsername(), incomeId);
+    }
+
+
+
+
+
 
     // ================== CRITICAL: ACCESS CONTROL ==================
 
@@ -161,9 +293,6 @@ public class IncomeService {
         return List.of(); // Empty list for other roles
     }
 
-    public List<IncomeResponseDTO> getIncomeByBus(Long busId, User user) {
-        return null;
-    }
 
 
 
@@ -183,8 +312,8 @@ public class IncomeService {
     private TripInfo mapTripInfo(TripIncomeDTO dto) {
         TripInfo info = new TripInfo();
         info.setNumberOfTrips(dto.getNoOfTrips());
-        info.setFromAmount(dto.getOnwardTripAmount());
-        info.setToAmount(dto.getReturnTripAmount());
+        info.setOnwardTripAmount(dto.getOnwardTripAmount());
+        info.setReturnTripAmount(dto.getReturnTripAmount());
         info.setOtherExpense(dto.getOtherExpense() != null ? dto.getOtherExpense() : BigDecimal.ZERO);
         info.setDriverSalary(dto.getDriverSalary());
         info.setConductorSalary(dto.getConductorSalary());
@@ -196,6 +325,7 @@ public class IncomeService {
         info.setNumberOfDays(dto.getNoOfDays());
         info.setFromLocation(dto.getOrigin());
         info.setDestination(dto.getDestination());
+        info.setHireAmount(dto.getHireAmount());
         info.setOtherExpense(dto.getOtherExpense() != null ? dto.getOtherExpense() : BigDecimal.ZERO);
         info.setDriverSalary(dto.getDriverSalary());
         info.setConductorSalary(dto.getConductorSalary());
@@ -205,9 +335,9 @@ public class IncomeService {
     // ------------------ CALCULATIONS ------------------
 
     private BigDecimal calculateTripAmount(TripInfo info) {
-        BigDecimal totalRevenue = info.getFromAmount()
-                .add(info.getToAmount())
-                .multiply(BigDecimal.valueOf(info.getNumberOfTrips()));
+        BigDecimal totalRevenue = info.getOnwardTripAmount()
+                .add(info.getReturnTripAmount());
+//                .multiply(BigDecimal.valueOf(info.getNumberOfTrips()));
 
         BigDecimal totalExpenses = info.getDriverSalary()
                 .add(info.getConductorSalary())
@@ -217,43 +347,35 @@ public class IncomeService {
     }
 
     private BigDecimal calculateHireAmount(HireInfo info) {
-        // Assuming you have a daily rate or total hire amount
-        // For now, just calculating expenses
-        BigDecimal totalExpenses = info.getDriverSalary()
-                .add(info.getConductorSalary())
-                .add(info.getOtherExpense());
 
-        // You might want to add hire revenue here
-        return totalExpenses.negate(); // Negative = expense only
+        BigDecimal revenue = defaultZero(info.getHireAmount());
+        BigDecimal expenses = defaultZero(info.getDriverSalary())
+                .add(defaultZero(info.getConductorSalary()))
+                .add(defaultZero(info.getOtherExpense()));
+
+        return revenue.subtract(expenses);
+    }
+
+    private BigDecimal defaultZero(BigDecimal value) {
+        return value == null ? BigDecimal.ZERO : value;
     }
 
     // ------------------ RESPONSE MAPPER ------------------
-
-    private IncomeResponseDTO mapToResponse(Income income) {
-        return new IncomeResponseDTO(
-                income.getId(),
-                income.getIncomeType(),
-                income.getAmount()
-        );
+    private IncomeResponseDTO mapToResponseDTO(Income income) {
+        return IncomeResponseDTO.builder()
+                .id(income.getId())
+                .incomeType(income.getIncomeType())
+                .profitAmount(income.getAmount())
+                .transactionDate(income.getTransactionDate())
+                .busId(income.getBus().getId())
+                .busNumber(income.getBus().getBusNumber())
+                .createdBy(income.getCreatedBy().getUsername())
+                .tripInfo(income.getTripInfo())
+                .hireInfo(income.getHireInfo())
+                .createdAt(income.getCreatedAt())
+                .updatedAt(income.getUpdatedAt())
+                .build();
     }
 
 
-
-
-//    public IncomeResponseDTO getIncomeById(Long incomeId, Long userId) {
-//
-//        User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("User Not Found"));
-//
-//        Bus bus = user.getBus();
-//        if (bus == null) {
-//            throw new RuntimeException("User not assigned to a bus");
-//        }
-//
-//        Income income = incomeRepository.findById(incomeId).orElseThrow(()-> new RuntimeException("Income Not Found"));
-//        return new IncomeResponseDTO(
-//                income.getId(),
-//                income.getIncomeType(),
-//                income.getAmount()
-//        );
-//    }
 }

@@ -14,9 +14,9 @@ public class TripIncomeDTO {
     @Max(value = 3, message = "Maximum 3 trips allowed per day")
     private Integer noOfTrips;
 
-    @NotNull(message = "Date is required")
-    @PastOrPresent(message = "Selected date should be present or past")
-    private LocalDate date;
+//    @NotNull(message = "Date is required")
+//    @PastOrPresent(message = "Selected date should be present or past")
+//    private LocalDate date;
 
     @NotNull(message = "Onward trip amount is required")
     @Positive(message = "Onward trip amount must be greater than zero")
